@@ -1,0 +1,984 @@
+:root {
+  color-scheme: only light;   /* không cho trình duyệt (Android, Zalo chế độ tối) tự đảo màu thiệp */
+  --kem: #f7f2e7;        /* nền kem */
+  --kem-ngoai: #ebe4d3;  /* phần ngoài cột thiệp khi xem trên máy tính */
+  --reu: #7b8459;        /* xanh rêu của nét vẽ */
+  --reu-dam: #4a5134;    /* chữ */
+  --reu-nhat: #b9bf9f;   /* viền */
+  --vang: #c9a24b;       /* nhuỵ hoa */
+  --vang-dam: #9a7a2e;   /* vàng đậm cho chữ nhỏ */
+  --do-mo-nen: .5;       /* độ rõ của nền hoa: 0 = mất hẳn, 1 = rõ nguyên bản */
+  --rong: 520px;
+  --le: 20px;            /* lề trái/phải của trang */
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--kem-ngoai);
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: "Cormorant Garamond", "Times New Roman", serif;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--reu-dam);
+  -webkit-font-smoothing: antialiased;
+  /* Font này mặc định dùng chữ số kiểu cổ (số 3, 7, 9 thò xuống dưới dòng);
+     ép về chữ số cao đều để ngày giờ, số nhà thẳng hàng */
+  font-variant-numeric: lining-nums;
+}
+
+/* ---------- Nền hoa mờ ---------- */
+.nen {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, var(--rong));
+  height: 100vh;
+  height: 100lvh;
+  background: var(--kem);
+  box-shadow: 0 0 60px rgba(74, 81, 52, .16);
+  z-index: -1;
+}
+.nen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("images/nen.jpg") center / cover no-repeat;
+  opacity: var(--do-mo-nen);
+}
+
+/* ---------- Khung trang ---------- */
+.trang {
+  width: min(100%, var(--rong));
+  margin: 0 auto;
+  padding: 0 var(--le) calc(90px + env(safe-area-inset-bottom));   /* chừa chỗ cho đĩa nhạc ở cuối trang */
+  overflow: hidden;
+}
+
+.chu-nho {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--reu);
+}
+
+.hoa-van {
+  display: block;
+  width: 120px;
+  height: 12px;
+  margin: 14px auto 0;
+  color: var(--vang);
+}
+
+.mo-dau {
+  padding: 40px 0 28px;
+  text-align: center;
+}
+.logo {
+  display: block;
+  width: 150px;
+  height: auto;
+  margin: 0 auto 4px;
+  /* quầng sáng kem để logo nổi trên nền hoa */
+  filter: drop-shadow(0 0 10px var(--kem)) drop-shadow(0 0 4px var(--kem));
+}
+.logo[hidden] { display: none; }
+
+/* Quầng sáng kem quanh chữ nằm trực tiếp trên nền hoa, cho dễ đọc */
+.mo-dau, .tieu-de, .ket {
+  text-shadow: 0 0 6px var(--kem), 0 0 14px var(--kem), 0 0 22px var(--kem);
+}
+
+.phan { padding-bottom: 64px; }
+
+.tieu-de {
+  text-align: center;
+  margin-bottom: 26px;
+}
+.tieu-de h2 {
+  margin: 6px 0 0;
+  font-size: 44px;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.15;
+  color: var(--reu-dam);
+}
+
+/* ---------- 1. Khung thiệp ---------- */
+.ds-khung {
+  display: grid;
+  gap: 28px;
+}
+
+.khung {
+  margin: 0;
+  padding: 9px;
+  background: rgba(255, 253, 248, .62);
+  border: 1px solid var(--reu-nhat);
+  box-shadow: 0 10px 30px rgba(74, 81, 52, .14);
+}
+.khung img {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: zoom-in;
+}
+
+.cho-trong {
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  text-align: center;
+  border: 1px dashed var(--reu-nhat);
+  color: var(--reu);
+}
+.khung .cho-trong { aspect-ratio: 2 / 3; }
+/* Khung thiệp lúc ảnh đang tải: chỉ là khung trống nhẹ, ánh sáng lướt qua */
+.cho-trong.cho-anh {
+  border: 1px solid var(--reu-nhat);
+  background: linear-gradient(100deg, rgba(255,253,248,.55) 30%, rgba(255,253,248,.95) 50%, rgba(255,253,248,.55) 70%) 0 0 / 300% 100%;
+  animation: anh-dang-tai 1.6s linear infinite;
+}
+.cho-trong.cho-anh.loi { animation: none; cursor: pointer; background: rgba(255,253,248,.8); }
+@keyframes anh-dang-tai { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .cho-trong.cho-anh { animation: none; } }
+.cho-trong b {
+  font-size: 30px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--reu-dam);
+}
+.cho-trong span {
+  font-size: 15px;
+  padding: 0 24px;
+}
+
+/* ---------- 2. Địa điểm ---------- */
+.the {
+  padding: 24px 16px 22px;
+  text-align: center;
+  background: rgba(255, 253, 248, .92);
+  border: 1px solid var(--reu-nhat);
+  box-shadow: 0 10px 30px rgba(74, 81, 52, .14);
+}
+.dd-thoi-gian {
+  margin-bottom: 12px;
+  color: var(--vang-dam);
+}
+.dd-ten {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.dd-sanh {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-style: italic;
+}
+.dd-dia-chi {
+  margin: 6px 0 18px;
+  font-size: 17px;
+  color: var(--reu);
+  text-wrap: balance;   /* không để rớt một chữ lẻ xuống dòng */
+}
+.the p:empty { display: none; }
+
+.ban-do {
+  height: 320px;
+  border: 1px solid var(--reu-nhat);
+  background: var(--kem);
+}
+.ban-do iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.nut {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 15px 30px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #fffdf8;
+  background: var(--reu);
+  border: 1px solid var(--reu);
+  transition: background .2s, color .2s;
+}
+.nut:hover,
+.nut:focus-visible {
+  background: var(--reu-dam);
+  border-color: var(--reu-dam);
+}
+
+.nut[hidden] { display: none; }
+
+/* Chữ chỉ dành cho trình đọc màn hình, không hiện trên trang */
+.chi-doc {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- 2. Xác nhận tham dự ---------- */
+.xn-han {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-style: italic;
+  color: var(--reu);
+}
+.xn-han:empty { display: none; }
+.xn-nhom {
+  min-width: 0;
+  margin: 22px 0 0;
+  padding: 0;
+  border: 0;
+}
+.xn-nhom[hidden] { display: none; }
+.xn-nhom > .xn-nhan { margin-top: 0; }   /* khoảng cách phía trên do .xn-nhom lo */
+.xn-nhan {
+  display: block;
+  width: 100%;
+  margin: 22px 0 9px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--reu);
+}
+.xn-han + .xn-nhom { margin-top: 14px; }
+.xn-han:empty + .xn-nhom { margin-top: 0; }
+.xn-buoc-2[hidden],
+.xn-chi-khi-co[hidden] { display: none; }
+/* Phần điền hiện ra nhẹ nhàng sau khi chọn có / không */
+.xn-buoc-2 { animation: hien-len .5s ease; }
+.xn-nhan i {
+  font-weight: 400;
+  letter-spacing: .04em;
+  text-transform: none;
+}
+.xn-o {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 19px;          /* từ 16px trở lên để iPhone không tự phóng to khi gõ */
+  text-align: center;
+  color: var(--reu-dam);
+  background: rgba(255, 255, 255, .75);
+  border: 1px solid var(--reu-nhat);
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+textarea.xn-o {
+  resize: vertical;
+  min-height: 92px;
+  text-align: left;
+}
+.xn-o:focus-visible,
+.xn-dem button:focus-visible,
+.xn-chon input:focus-visible + span {
+  outline: 2px solid var(--reu);
+  outline-offset: 2px;
+}
+
+/* Lựa chọn dạng ô bấm */
+.xn-chon {
+  display: grid;
+  gap: 8px;
+}
+.xn-chon.hai-cot { grid-template-columns: 1fr 1fr; }
+.xn-chon label {
+  position: relative;
+  display: block;
+}
+.xn-chon input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.xn-chon span {
+  display: block;
+  padding: 12px 10px;
+  font-size: 19px;
+  border: 1px solid var(--reu-nhat);
+  background: rgba(255, 255, 255, .55);
+  transition: background .2s, color .2s, border-color .2s;
+}
+.xn-chon input:checked + span {
+  color: #fffdf8;
+  background: var(--reu);
+  border-color: var(--reu);
+}
+
+/* Bộ đếm số người */
+.xn-dem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.xn-dem button {
+  width: 46px;
+  height: 46px;
+  padding: 0 0 3px;
+  font: inherit;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--reu-dam);
+  background: rgba(255, 255, 255, .55);
+  border: 1px solid var(--reu-nhat);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.xn-dem output {
+  min-width: 36px;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.xn-bay {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.xn-loi {
+  margin: 16px 0 0;
+  font-size: 17px;
+  color: #9b3d2e;
+}
+#xn-form .nut { margin-top: 22px; }
+/* Nhân vật lego đáp lại sau khi gửi xác nhận */
+.xn-hinh {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 2px;
+  margin: 2px auto 10px;
+  animation: nhan-vat-ra .7s cubic-bezier(.2, .9, .3, 1.25);
+}
+.xn-hinh img {
+  display: block;
+  height: 168px;
+  width: auto;
+  filter: drop-shadow(0 5px 6px rgba(60, 55, 35, .16));
+}
+.xn-hinh[hidden] { display: none; }
+/* Có tham dự: cô dâu cầm que pháo (trái), chú rể cầm champagne (phải), đứng cách nhau cho pháo và rượu bay vào giữa */
+.xn-hinh.an-mung { position: relative; gap: 34px; margin-top: 18px; }
+.xn-hinh.an-mung img { height: 186px; }
+.xn-hinh.an-mung.dang-vao { animation: none; }
+.xn-hinh.an-mung.dang-vao img:first-child { animation: vao-trai .6s cubic-bezier(.2, .9, .3, 1.2) both; }
+.xn-hinh.an-mung.dang-vao img:last-child { animation: vao-phai .6s cubic-bezier(.2, .9, .3, 1.2) both; }
+@keyframes vao-trai { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
+@keyframes vao-phai { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+/* chú rể lắc chai trước khi bật nút */
+.xn-hinh img.lac-chai { transform-origin: 50% 100%; animation: lac-chai .14s ease-in-out infinite alternate; }
+@keyframes lac-chai { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+/* lớp vẽ pháo và champagne: phủ rộng ra hai bên và lên trên khung */
+.xn-phao {
+  position: absolute;
+  left: -60px;
+  top: -200px;
+  width: calc(100% + 120px);
+  height: calc(100% + 260px);
+  pointer-events: none;
+  z-index: 2;
+}
+@keyframes nhan-vat-ra {
+  from { opacity: 0; transform: translateY(18px) scale(.9); }
+  to { opacity: 1; transform: none; }
+}
+.xn-cam-on {
+  margin: 6px 0 12px;
+  font-size: 23px;
+  font-style: italic;
+  line-height: 1.4;
+  text-wrap: balance;
+  outline: none;
+}
+.xn-sua {
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--reu);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* ---------- 4. Album cuộn ngang ---------- */
+.dai-anh {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  /* tràn ra sát hai mép trang; lề 12% để ảnh đầu và ảnh cuối cũng vào được giữa */
+  margin: 0 calc(-1 * var(--le));
+  padding: 14px 12%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.dai-anh::-webkit-scrollbar { display: none; }
+.dai-anh:focus-visible {
+  outline: 2px solid var(--reu);
+  outline-offset: -2px;
+}
+.o-anh {
+  flex: 0 0 100%;          /* 100% phần giữa hai lề 12% = 76% bề ngang trang */
+  aspect-ratio: 3 / 4;     /* bộ ảnh mới đa số dọc 3:4 (có ảnh 2:3, 4:5): khung 3:4 cắt ít nhất; bấm xem to thì thấy đủ ảnh */
+  margin: 0;
+  padding: 6px;
+  scroll-snap-align: center;
+  background: rgba(255, 253, 248, .92);
+  border: 1px solid var(--reu-nhat);
+  box-shadow: 0 8px 22px rgba(74, 81, 52, .16);
+  cursor: zoom-in;
+  font: inherit;
+  color: inherit;
+  /* --ro (độ rõ) do script đặt theo khoảng cách tới giữa màn hình, đổi tức thì theo ngón tay (không trễ,
+     không co giãn kích thước) để trượt không bị rung */
+  opacity: var(--ro, 1);
+}
+.o-anh img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--kem);
+  user-select: none;
+}
+/* Ảnh chưa tải thì để trống màu kem, không hiện biểu tượng ảnh hỏng */
+.o-anh img:not([src]) { visibility: hidden; }
+
+/* Nút lùi / tiến và số đếm dưới dải ảnh */
+.dai-dk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 6px;
+  font-size: 16px;
+  letter-spacing: .2em;
+  color: var(--reu);
+  text-shadow: 0 0 6px var(--kem), 0 0 14px var(--kem);
+}
+.dai-dk span {
+  min-width: 70px;
+  text-align: center;
+}
+.dai-dk button {
+  width: 40px;
+  height: 40px;
+  padding: 0 0 4px;
+  font: inherit;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--reu-dam);
+  background: rgba(255, 253, 248, .8);
+  border: 1px solid var(--reu-nhat);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.dai-dk button:focus-visible {
+  outline: 2px solid var(--reu);
+  outline-offset: 2px;
+}
+
+/* ---------- Cuối trang ---------- */
+.ket {
+  position: relative;      /* chỗ để chùm tim bay ra */
+  padding: 0 16px 20px;
+  text-align: center;
+  font-size: 22px;
+  font-style: italic;
+}
+
+/* Chùm tim khi chạm vào đôi lego */
+.tim {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+.tim svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  filter: drop-shadow(0 1px 1px rgba(74, 81, 52, .2));
+}
+
+.ket .hoa-van { margin: 0 auto 18px; }
+/* đường kẻ trang trí nằm dưới chân đôi lego, như mặt đất chỗ hai người đứng */
+.ket .doi-nhay { margin-bottom: 4px; }
+/* Vòng sáng vàng nhấp nháy dưới chân đôi lego cuối thiệp: gợi ý khách chạm vào (chạm rồi thì tắt) */
+#doi-cuoi { position: relative; }
+#doi-cuoi::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  z-index: -1;
+  width: 160px;
+  height: 26px;
+  margin-left: -80px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(212, 168, 69, .4), rgba(212, 168, 69, 0) 70%);
+  pointer-events: none;
+  animation: sang-chan 2.4s ease-in-out infinite;
+}
+#doi-cuoi.da-cham::after { animation: none; opacity: 0; transition: opacity .6s; }
+@keyframes sang-chan { 0%, 100% { opacity: .35; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.1); } }
+@media (prefers-reduced-motion: reduce) { #doi-cuoi::after { animation: none; opacity: .6; } }
+.ket .hoa-van-chan { margin: 0 auto 6px; }
+.ket p { margin: 0; }
+.ket p:empty { display: none; }
+
+/* ---------- Cô dâu chú rể kiểu lego ---------- */
+.doi {
+  --bb-rong: 92px;
+  --bb-da: #f6cb2e;        /* vàng tươi của đồ chơi */
+  --bb-da-dam: #dcae17;
+  --bb-vest: #1e1e1e;
+  --bb-giay: #0d0d0d;
+  --bb-trang: #ffffff;
+  --bb-de: #ecebe4;
+  --bb-toc: #2a201a;
+  --bb-toc-nu: #3a281d;
+  --bb-hong: #f29bb5;
+  --bb-hong-dam: #e2578f;
+  --bb-la: #5a9a55;
+  --bb-vang: #d9b25a;
+  --bb-voan: rgba(255, 255, 255, .72);
+  --bb-vien: rgba(60, 50, 30, .3);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+.doi[hidden] { display: none; }
+.bup-be {
+  display: block;
+  flex: none;
+  width: var(--bb-rong);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 5px 6px rgba(60, 55, 35, .22));
+}
+/* Cô dâu đứng sát chú rể vừa đủ để hai bàn tay chạm nhau khi nắm tay */
+.co-dau { margin-left: calc(var(--bb-rong) * -0.15); }
+
+.bup-be .tay,
+.bup-be .chan,
+.bup-be .mat {
+  transform-box: fill-box;
+}
+/* Tay xoay quanh vai, chân xoay quanh hông như đồ chơi thật */
+.bup-be .tay { transform-origin: 50% 5px; transition: transform .45s ease; }
+.bup-be .tay-t { transform: rotate(12deg); }
+.bup-be .tay-p { transform: rotate(-12deg); }
+.bup-be .chan { transform-origin: 50% 0; }
+.bup-be .mat { transform-origin: 50% 50%; animation: chop-mat 4.6s infinite; }
+.co-dau .mat { animation-delay: 1.3s; }
+
+/* Nắm tay: tay phía trong của hai người đưa về phía nhau */
+.doi.nam-tay .chu-re .tay-p { transform: rotate(-38deg); }
+.doi.nam-tay .co-dau .tay-t { transform: rotate(38deg); }
+
+/* Bước đi */
+.doi.dang-di .than { animation: nhun 0.36s ease-in-out infinite alternate; }
+.doi.dang-di .chan-t { animation: buoc 0.36s ease-in-out infinite alternate; }
+.doi.dang-di .chan-p { animation: buoc 0.36s ease-in-out infinite alternate-reverse; }
+
+/* Khi dùng ảnh lego thật thay cho hình vẽ: hai ảnh cắt từ một tấm, đứng sát là liền lại như ảnh gốc */
+.doi-anh .bup-be {
+  width: auto;
+  height: calc(var(--bb-rong) * 1.5);
+  filter: drop-shadow(0 4px 5px rgba(60, 55, 35, .16));
+  transform-origin: 50% 100%;
+}
+.doi-anh .co-dau { margin-left: 0; }
+/* Ảnh không co duỗi tay chân được nên bước đi bằng cách lắc lư nhè nhẹ */
+.doi-anh.dang-di .chu-re { animation: lac-lu 0.34s ease-in-out infinite alternate; }
+.doi-anh.dang-di .co-dau { animation: lac-lu 0.34s ease-in-out infinite alternate-reverse; }
+/* Một ảnh chung cho cả đôi: cao hơn vì gồm hai người, lúc "bước đi" thì nhún nhảy nhẹ cả đôi */
+.doi-chung .doi-mot { height: calc(var(--bb-rong) * 1.95); }
+/* Cuối thiệp: cô dâu đứng bên trái chú rể, hai ảnh riêng đứng cạnh nhau */
+#doi-cuoi.doi-anh:not(.doi-chung) { gap: calc(var(--bb-rong) * .1); }
+#doi-cuoi .co-dau { order: -1; }
+#doi-cuoi.doi-anh .bup-be:not(.doi-mot) { height: calc(var(--bb-rong) * 1.8); }
+.doi-anh.dang-di .doi-mot { animation: lac-lu 0.34s ease-in-out infinite alternate; }
+@keyframes lac-lu {
+  from { transform: rotate(-3.5deg) translateY(0); }
+  50% { transform: rotate(0deg) translateY(-3px); }
+  to { transform: rotate(3.5deg) translateY(0); }
+}
+
+/* Đung đưa theo nhạc ở cuối thiệp: nhạc tắt thì đứng yên */
+.doi-nhay {
+  margin: 0 0 22px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transform-origin: 50% 100%;
+  animation: lac 2.8s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+.co-nhac .doi-nhay,
+.khong-nhac .doi-nhay { animation-play-state: running; }
+
+@keyframes chop-mat {
+  0%, 94%, 100% { transform: scaleY(1); }
+  96.5% { transform: scaleY(.12); }
+}
+@keyframes nhun {
+  from { transform: translateY(0); }
+  to { transform: translateY(-2.5px); }
+}
+@keyframes buoc {
+  from { transform: rotate(-14deg); }
+  to { transform: rotate(14deg); }
+}
+@keyframes lac {
+  from { transform: rotate(-3.2deg) translateY(0); }
+  50% { transform: rotate(0deg) translateY(-3px); }
+  to { transform: rotate(3.2deg) translateY(0); }
+}
+
+/* ---------- Màn mở thiệp ---------- */
+.bia {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  align-items: safe center;      /* nội dung cao hơn màn hình thì bắt đầu từ trên, không bị cắt mất đầu */
+  background: var(--kem-ngoai);
+  transition: opacity .9s ease, visibility .9s;
+  overflow-y: auto;              /* màn thấp (điện thoại xoay ngang) vẫn cuộn tới được nút Mở thiệp */
+  overscroll-behavior: contain;
+}
+.bia[hidden] { display: none; }
+/* Màn mở thiệp hiện ngay từ đầu (trước khi script.js tải xong) để khách không thấy nội dung thiệp chớp qua;
+   phần chữ và hình chờ script điền xong mới hiện. */
+html.cho-bia .bia[hidden] { display: grid; }
+html.cho-bia .bia-vom { visibility: hidden; }
+html.cho-bia .bia-vom > * { animation-play-state: paused; }
+.bia.dang-dong {
+  opacity: 0;
+  visibility: hidden;
+}
+.bia-nen {
+  position: absolute;
+  z-index: 0;
+  height: 100%;
+}
+.bia-phao {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.bia-trong {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(100%, var(--rong));
+  min-height: 100%;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+}
+
+/* Không dùng khung: một quầng kem mềm ở giữa cho chữ dễ đọc, nền hoa lộ dần ra bốn phía */
+.bia-trong::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 92% 60% at 50% 47%,
+    rgba(252, 249, 242, .97) 0%, rgba(252, 249, 242, .92) 52%, rgba(252, 249, 242, 0) 100%);
+  pointer-events: none;
+}
+.bia-vom {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  justify-content: safe center;
+  gap: clamp(6px, 1.5vh, 14px);
+  padding: 12px 8px;
+  text-align: center;
+}
+/* Các phần lần lượt hiện lên */
+.bia-vom > * {
+  opacity: 0;
+  animation: hien-len 1s ease forwards;
+}
+.bia-vom > :nth-child(1) { animation-delay: .15s; }
+.bia-vom > :nth-child(2) { animation-delay: .45s; }
+.bia-vom > :nth-child(3) { animation-delay: .7s; }
+.bia-vom > :nth-child(4) { animation-delay: 1s; }
+.bia-vom > :nth-child(5) { animation-delay: 1.15s; }
+.bia-vom > :nth-child(6) { animation-delay: 1.45s; }
+.bia-vom > :nth-child(7) { animation-delay: 1.9s; }
+@keyframes hien-len {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.bia-logo {
+  display: block;
+  width: clamp(84px, 27vw, 118px);
+  height: auto;
+  margin-bottom: clamp(2px, 1vh, 10px);
+}
+.bia-logo[hidden] { display: none; }
+/* Chữ trên màn mở thiệp chỉ còn hai dòng: tên và ngày */
+/* "Save the date": chữ thư pháp, cùng kiểu với tiêu đề trên thiệp giấy */
+.bia-ten {
+  margin: clamp(6px, 1.6vh, 16px) 0 0;
+  font-family: "Pinyon Script", "Cormorant Garamond", cursive;
+  font-size: clamp(38px, 11.6vw, 50px);
+  font-weight: 400;
+  line-height: 1.25;
+  color: #7d7262;          /* nâu xám nhạt, dịu với nền hoa, tách màu với logo vàng */
+  text-wrap: balance;
+}
+.bia-ngay {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: clamp(2px, .8vh, 8px) 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .3em;
+  color: var(--vang-dam);
+}
+/* hai vạch mảnh hai bên ngày */
+.bia-ngay::before,
+.bia-ngay::after {
+  content: "";
+  width: 30px;
+  height: 1px;
+  background: var(--vang);
+}
+.bia-ngay:empty { display: none; }
+
+/* Hai nhân vật lego đứng trên một vạch nền mảnh */
+.bia-san {
+  margin-top: clamp(10px, 2.6vh, 28px);
+  padding: 0 34px 7px;
+  background: linear-gradient(90deg, transparent, var(--vang) 30%, var(--vang) 70%, transparent) bottom / 100% 1px no-repeat;
+}
+.bia-doi { --bb-rong: clamp(74px, 24vw, 98px); }
+.bia-doi.doi-anh { --bb-rong: clamp(74px, min(29vw, 13.5vh), 116px); }
+/* Lúc đầu hai nhân vật đứng cách nhau; chạm "Mở thiệp" thì bước lại gần */
+.bia-doi .bup-be { transition: translate 1.3s ease-in-out; }
+.bia-doi .chu-re { translate: -20px 0; }
+.bia-doi .co-dau { translate: 20px 0; }
+.bia-doi.gan .bup-be { translate: 0 0; }
+/* Cảnh cầu hôn: cô dâu đứng yên, chú rể cầm hộp nhẫn bước tới */
+.bia-doi.cau-hon .chu-re { translate: -40px 0; }
+.bia-doi.cau-hon .co-dau { translate: 0 0; }
+.bia-doi.cau-hon.gan .chu-re { translate: 14px 0; }   /* bước hẳn tới sát cô dâu */
+.doi-anh.cau-hon.dang-di .co-dau { animation: none; }
+
+/* Nút mở thiệp: viền mảnh, có quầng sáng nhè nhẹ mời chạm */
+.bia-nut {
+  margin-top: clamp(12px, 2.6vh, 26px);
+  padding: 13px 40px 13px 44px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .36em;
+  text-transform: uppercase;
+  color: var(--reu-dam);
+  background: rgba(255, 253, 248, .7);
+  border: 1px solid var(--vang-dam);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .25s, color .25s;
+}
+.bia-nut:hover,
+.bia-nut:focus-visible {
+  color: #fffdf8;
+  background: var(--vang-dam);
+  outline: none;
+}
+.bia-vom > .bia-nut {
+  animation: hien-len 1s ease 1.9s forwards, moi-cham 2.6s ease-in-out 3s infinite;
+}
+.bia-vom > .bia-nut.an {
+  animation: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s;
+}
+@keyframes moi-cham {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 162, 75, .5); }
+  60% { box-shadow: 0 0 0 11px rgba(201, 162, 75, 0); }
+}
+
+/* ---------- Đĩa nhạc ---------- */
+.dia {
+  position: fixed;
+  z-index: 5;
+  right: max(14px, calc(50% - var(--rong) / 2 + 14px));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(44, 47, 36, .35);
+  cursor: pointer;
+}
+.dia[hidden] { display: none; }
+/* Đĩa nhạc đang nằm đè lên nút bấm, ô điền: mờ đi và cho chạm xuyên qua để khách bấm đúng nút bên dưới */
+.dia { transition: opacity .25s ease; }
+.dia.nhuong { opacity: .28; pointer-events: none; }
+.dia svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.dia:focus-visible {
+  outline: 2px solid var(--reu);
+  outline-offset: 3px;
+}
+.dia-quay {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: quay 5s linear infinite;
+  animation-play-state: paused;
+}
+.co-nhac .dia-quay { animation-play-state: running; }
+/* Gạch chéo báo nhạc đang tắt */
+.dia-gach { transition: opacity .25s; }
+.co-nhac .dia-gach { opacity: 0; }
+@keyframes quay { to { transform: rotate(360deg); } }
+
+/* ---------- Xem ảnh phóng to ---------- */
+.xem-anh {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  background: rgba(38, 42, 26, .94);
+  touch-action: pan-y pinch-zoom;
+}
+.xem-anh[hidden] { display: none; }
+.xem-anh img {
+  max-width: 100vw;
+  max-height: 100vh;
+  max-height: 100dvh;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.xa-nut {
+  position: absolute;
+  z-index: 1;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  padding: 0 0 4px;
+  font: 400 34px/1 "Cormorant Garamond", serif;
+  color: #fffdf8;
+  background: rgba(38, 42, 26, .5);
+  border: 1px solid rgba(255, 253, 248, .35);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.xa-dong { top: calc(14px + env(safe-area-inset-top)); right: 14px; }
+.xa-truoc { left: 10px; top: 50%; transform: translateY(-50%); }
+.xa-sau { right: 10px; top: 50%; transform: translateY(-50%); }
+.xa-dem {
+  position: absolute;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: .2em;
+  color: rgba(255, 253, 248, .8);
+}
+.mot-anh .xa-truoc,
+.mot-anh .xa-sau,
+.mot-anh .xa-dem { display: none; }
+
+body.khoa-cuon { overflow: hidden; }
+
+/* ---------- Hiệu ứng hiện dần khi cuộn ---------- */
+.js .cuon {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .9s ease, transform .9s ease;
+}
+.js .cuon.hien {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .doi-nhay, .bup-be .mat, .dia-quay { animation: none; }
+  .bia-doi .bup-be { transition: none; }
+  .bia-vom > *, .bia-vom > .bia-nut { animation: none; opacity: 1; }
+  .js .cuon { opacity: 1; transform: none; transition: none; }
+}
+
+@media (max-width: 380px) {
+  :root { --le: 14px; }
+  .tieu-de h2 { font-size: 38px; }
+  .ban-do { height: 280px; }
+}
+
+/* Điện thoại xoay ngang (màn thấp): thu nhỏ các phần của màn mở thiệp cho vừa một màn hình */
+@media (orientation: landscape) and (max-height: 520px) {
+  .bia .bia-trong { padding-top: 8px; padding-bottom: 8px; }
+  .bia .bia-vom { gap: 2px; padding: 2px 8px; }
+  .bia .bia-logo { width: 58px; margin-bottom: 0; }
+  .bia .bia-ten { font-size: 30px; margin-top: 0; line-height: 1.15; }
+  .bia .bia-doi.doi-anh { --bb-rong: 50px; }
+}

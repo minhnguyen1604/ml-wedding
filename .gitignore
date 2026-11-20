@@ -1,0 +1,4 @@
+# Cấu hình riêng của Claude trên từng máy (giữ lại launch.json để chạy xem thử)
+.claude/*
+!.claude/launch.json
+__pycache__/
